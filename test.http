@@ -1,0 +1,6 @@
+POST http://localhost:3000/api/access
+Content-Type: application/json
+
+{
+  "uid": "A1B2C3D4"
+}
