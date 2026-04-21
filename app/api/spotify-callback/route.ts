@@ -8,15 +8,17 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'No se recibió ningún código de Spotify' }, { status: 400 });
   }
 
-  const client_id = process.env.SPOTIFY_CLIENT_ID;
-  const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
-  const redirect_uri = process.env.SPOTIFY_REDIRECT_URI;
+  const client_id = process.env.SPOTIFY_CLIENT_ID || '';
+  const client_secret = process.env.SPOTIFY_CLIENT_SECRET || '';
+  const redirect_uri = process.env.SPOTIFY_REDIRECT_URI || '';
 
   const basicAuth = Buffer.from(`${client_id}:${client_secret}`).toString('base64');
 
+  // Armamos la URL de token por separado
+  const tokenUrl = 'https://' + 'accounts.spotify.com' + '/api/token';
+
   try {
-    // ⚠️ AQUÍ ESTÁ LA CORRECCIÓN: La URL oficial para pedir tokens
-    const response = await fetch('https://accounts.spotify.com/api/token', {
+    const response = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Basic ${basicAuth}`,
@@ -25,7 +27,7 @@ export async function GET(request: Request) {
       body: new URLSearchParams({
         grant_type: 'authorization_code',
         code: code,
-        redirect_uri: redirect_uri as string,
+        redirect_uri: redirect_uri,
       }),
     });
 
@@ -36,7 +38,7 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json({
-      mensaje: "¡ÉXITO! Copia el refresh_token de abajo y guárdalo en tu archivo .env local y en Vercel como SPOTIFY_REFRESH_TOKEN.",
+      mensaje: "¡ÉXITO! Copia el refresh_token de abajo y guárdalo en tu archivo .env local y en Vercel.",
       refresh_token: data.refresh_token
     });
 
