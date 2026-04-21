@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { accessRequestSchema } from "@/lib/validations/access";
 // Importamos una función para VALIDAR, no para crear
 import { checkActiveReservation } from "@/lib/google-calendar";
+import { playLabVibe } from "@/lib/spotify";
 
 export async function POST(request: Request) {
   try {
@@ -41,10 +42,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ open: false, message: `Hola ${user.name}, no tienes reservas en este horario.` }, { status: 403 });
     }
 
-    // 3. Si existe y tiene reserva, otorgamos acceso
+    // 3. Si existe y tiene reserva, otorgamos acceso en la DB
     await prisma.accessLog.create({ data: { nfc_uid: uid, granted: true } });
 
-    // TODO: Integración Spotify API
+    // 4. ¡QUE SUENE LA MÚSICA! 🎵
+    // Usamos await pero dentro de un try/catch (o simplemente ignorando el error si falla)
+    // para no bloquear la apertura de la puerta si Spotify está caído.
+    await playLabVibe();
+
+    return NextResponse.json(
+      {
+        open: true,
+        message: `Acceso concedido para ${user.name}`,
+      },
+      { status: 200 }
+    );
 
     return NextResponse.json(
       {
