@@ -57,14 +57,6 @@ export async function POST(request: Request) {
       },
       { status: 200 }
     );
-
-    return NextResponse.json(
-      {
-        open: true,
-        message: `Acceso concedido para ${user.name}`,
-      },
-      { status: 200 }
-    );
   } catch (error) {
     console.error("POST /api/access error:", error);
     return NextResponse.json({ open: false, message: "Error interno del servidor" }, { status: 500 });
