@@ -8,9 +8,18 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'No se recibió ningún código de Spotify' }, { status: 400 });
   }
 
-  const client_id = process.env.SPOTIFY_CLIENT_ID || '';
-  const client_secret = process.env.SPOTIFY_CLIENT_SECRET || '';
-  const redirect_uri = process.env.SPOTIFY_REDIRECT_URI || '';
+  const client_id = process.env.SPOTIFY_CLIENT_ID?.trim();
+  const client_secret = process.env.SPOTIFY_CLIENT_SECRET?.trim();
+  const redirect_uri =
+    process.env.SPOTIFY_REDIRECT_URI?.trim() ||
+    new URL('/api/spotify-callback', request.url).toString();
+
+  if (!client_id || !client_secret) {
+    return NextResponse.json(
+      { error: 'Faltan SPOTIFY_CLIENT_ID o SPOTIFY_CLIENT_SECRET en entorno' },
+      { status: 500 },
+    );
+  }
 
   const basicAuth = Buffer.from(`${client_id}:${client_secret}`).toString('base64');
 
