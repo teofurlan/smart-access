@@ -23,7 +23,14 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
-      await prisma.accessLog.create({ data: { nfc_uid: uid, granted: false } });
+      await prisma.accessLog.create({
+        data: {
+          nfc_uid: uid,
+          granted: false,
+          denial_reason: "UNKNOWN_CARD",
+          message: "Esta tarjeta no está registrada. Si es tuya, acude a recepción.",
+        },
+      });
       return NextResponse.json({ open: false, message: "Acceso denegado: Tarjeta desconocida" }, { status: 403 });
     }
 
@@ -38,12 +45,27 @@ export async function POST(request: Request) {
     }
 
     if (!hasReservation) {
-      await prisma.accessLog.create({ data: { nfc_uid: uid, granted: false } });
+      await prisma.accessLog.create({
+        data: {
+          nfc_uid: uid,
+          granted: false,
+          denial_reason: "NO_ACTIVE_RESERVATION",
+          user_name: user.name,
+          message: `${user.name}, no tienes una reserva activa ahora mismo en el calendario del laboratorio.`,
+        },
+      });
       return NextResponse.json({ open: false, message: `Hola ${user.name}, no tienes reservas en este horario.` }, { status: 403 });
     }
 
     // 3. Si existe y tiene reserva, otorgamos acceso en la DB
-    await prisma.accessLog.create({ data: { nfc_uid: uid, granted: true } });
+    await prisma.accessLog.create({
+      data: {
+        nfc_uid: uid,
+        granted: true,
+        user_name: user.name,
+        message: `Reserva confirmada. ¡Bienvenido, ${user.name}!`,
+      },
+    });
 
     // 4. ¡QUE SUENE LA MÚSICA! 🎵
     // Usamos await pero dentro de un try/catch (o simplemente ignorando el error si falla)
