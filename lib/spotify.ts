@@ -71,7 +71,7 @@ async function getAccessToken(): Promise<TokenSuccess | TokenError> {
 const DEFAULT_PLAYLIST_URI = "spotify:playlist:37i9dQZF1DX4sWSpwq3LiO";
 
 /** Da play a la playlist configurada (o la default). Requiere dispositivo activo en la cuenta de Spotify. */
-export async function playLabVibe() {
+export async function playLabVibe(customUri?: string | null) {
   try {
     const tokenResult = await getAccessToken();
 
@@ -85,8 +85,7 @@ export async function playLabVibe() {
     }
 
     const { access_token } = tokenResult;
-    const context_uri =
-      process.env.SPOTIFY_PLAYLIST_URI?.trim() || DEFAULT_PLAYLIST_URI;
+    const context_uri = customUri?.trim() || DEFAULT_PLAYLIST_URI;
 
     const response = await fetch(PLAY_ENDPOINT, {
       method: "PUT",

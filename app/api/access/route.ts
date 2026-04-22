@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     // 1. ¿Existe la tarjeta en la DB?
     const user = await prisma.user.findUnique({
       where: { nfc_uid: uid },
-      select: { id: true, name: true, role: true },
+      select: { id: true, name: true, email: true, role: true, spotify_uri: true },
     });
 
     if (!user) {
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     // 2. ¿Tiene reserva activa en Google Calendar ahora mismo?
     let hasReservation = false;
     try {
-      hasReservation = await checkActiveReservation();
+      hasReservation = await checkActiveReservation(user.email);
     } catch (calendarError) {
       console.error("Error consultando Google Calendar:", calendarError);
       // Si el calendario falla, por seguridad denegamos el acceso
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     // 4. ¡QUE SUENE LA MÚSICA! 🎵
     // Usamos await pero dentro de un try/catch (o simplemente ignorando el error si falla)
     // para no bloquear la apertura de la puerta si Spotify está caído.
-    await playLabVibe();
+    await playLabVibe(user.spotify_uri);
 
     return NextResponse.json(
       {

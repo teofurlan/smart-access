@@ -3,21 +3,21 @@
 import { useState } from 'react';
 
 export default function SimuladorNFC() {
-  const [uid, setUid] = useState('A1B2C3D4');
+  const [uid, setUid] = useState('32A66F21');
   const [respuesta, setRespuesta] = useState<any>(null);
   const [cargando, setCargando] = useState(false);
 
   const simularEscaneo = async () => {
     setCargando(true);
     setRespuesta(null);
-    
+
     try {
       const res = await fetch('/api/access', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ uid })
       });
-      
+
       const data = await res.json();
       setRespuesta({ status: res.status, data });
     } catch (error) {
@@ -32,18 +32,18 @@ export default function SimuladorNFC() {
       <div className="bg-gray-800 p-8 rounded-xl shadow-2xl max-w-md w-full border border-gray-700">
         <h1 className="text-2xl font-bold mb-2 text-center text-blue-400">ESP32 Virtual</h1>
         <p className="text-sm text-gray-400 mb-6 text-center">Simula el escaneo de un tag NFC</p>
-        
+
         <div className="mb-4">
           <label className="block text-sm mb-2 text-gray-300">UID de la Tarjeta</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             value={uid}
             onChange={(e) => setUid(e.target.value)}
             className="w-full bg-gray-700 text-white border border-gray-600 rounded p-2 focus:outline-none focus:border-blue-500 font-mono"
           />
         </div>
 
-        <button 
+        <button
           onClick={simularEscaneo}
           disabled={cargando}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition-colors disabled:opacity-50"

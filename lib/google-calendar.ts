@@ -49,7 +49,23 @@ function getGoogleAuth() {
 // ==========================================
 // FUNCIÓN 1: CONSULTAR RESERVA (AUTORIZACIÓN)
 // ==========================================
-export async function checkActiveReservation(): Promise<boolean> {
+function eventMatchesUserEmail(event: { attendees?: Array<{ email?: string | null } | null> | null; organizer?: { email?: string | null } | null; creator?: { email?: string | null } | null }, userEmail: string): boolean {
+  const normalizedUserEmail = userEmail.trim().toLowerCase();
+  const attendees = event.attendees ?? [];
+  const attendeeMatch = attendees.some(
+    (attendee) => attendee?.email?.trim().toLowerCase() === normalizedUserEmail
+  );
+
+  if (attendeeMatch) return true;
+
+  const organizerEmail = event.organizer?.email?.trim().toLowerCase();
+  if (organizerEmail === normalizedUserEmail) return true;
+
+  const creatorEmail = event.creator?.email?.trim().toLowerCase();
+  return creatorEmail === normalizedUserEmail;
+}
+
+export async function checkActiveReservation(userEmail: string): Promise<boolean> {
   const calendarId = process.env.GOOGLE_CALENDAR_ID;
 
   if (!calendarId) {
@@ -73,8 +89,8 @@ export async function checkActiveReservation(): Promise<boolean> {
       orderBy: "startTime",
     });
 
-    const eventosActivos = response.data.items;
-    return !!eventosActivos && eventosActivos.length > 0;
+    const eventosActivos = response.data.items ?? [];
+    return eventosActivos.some((event) => eventMatchesUserEmail(event, userEmail));
 
   } catch (error) {
     console.error("Error consultando la API de Google Calendar:", error);
