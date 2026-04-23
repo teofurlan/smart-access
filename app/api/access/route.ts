@@ -51,7 +51,7 @@ export async function POST(request: Request) {
           granted: false,
           denial_reason: "NO_ACTIVE_RESERVATION",
           user_name: user.name,
-          message: `${user.name}, no tienes una reserva activa ahora mismo en el calendario del laboratorio.`,
+          message: `${user.name}, no tienes una reserva activa ahora mismo en el calendario de la sala.`,
         },
       });
       return NextResponse.json({ open: false, message: `Hola ${user.name}, no tienes reservas en este horario.` }, { status: 403 });
